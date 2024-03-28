@@ -13,21 +13,25 @@ namespace RegisterAndLoginApp.Controllers
             return View();
         }
 
+        [HttpGet]
+        [CustomAuthorization]
+        public IActionResult PrivateSectionMustBeLoggedIn()
+        {
+            return Content("I am a protected method");
+        }
+        [LogActionFilter]
         public IActionResult ProcessLogin(UserModel userModel) 
         {
-            MyLogger.GetInstance().Info("Processing a login attempt");
-            MyLogger.GetInstance().Info(userModel.toString());
-
             SecurityService securityService = new SecurityService();
 
             if(securityService.IsValid(userModel))
             {
-                MyLogger.GetInstance().Info("Login success");
+                HttpContext.Session.SetString("username", userModel.UserName);
                 return View("LoginSuccess", userModel);
             }
             else
             {
-                MyLogger.GetInstance().Warn("Login failure");
+                HttpContext.Session.Remove("username");
                 return View("LoginFailure", userModel);
             }
         }
